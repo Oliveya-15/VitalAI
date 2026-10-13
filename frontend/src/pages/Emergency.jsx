@@ -44,33 +44,120 @@ function Triage() {
 }
 
 function Nearby() {
-  const [pos, setPos] = useState(null), [kind, setKind] = useState('hospital'), [places, setPlaces] = useState([]), [busy, setBusy] = useState(false), [err, setErr] = useState('')
+  const [pos, setPos] = useState(null)
+  const [kind, setKind] = useState('hospital')
+  const [places, setPlaces] = useState([])
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
   const [ambs, setAmbs] = useState([])
+  const [manualAddress, setManualAddress] = useState('')
+
   const search = async (p = pos, k = kind) => {
     if (!p) return
     setBusy(true); setErr('')
-    try { setPlaces(await api.nearby(k, p.lat, p.lon)); setAmbs(await api.ambulances(p.lat, p.lon)) } catch (x) { setErr(x.message); setPlaces([]) } finally { setBusy(false) }
+    try {
+      setPlaces(await api.nearby(k, p.lat, p.lon))
+      setAmbs(await api.ambulances(p.lat, p.lon))
+    } catch (x) {
+      setErr(x.message); setPlaces([])
+    } finally {
+      setBusy(false)
+    }
   }
+
+  const handleManualSearch = async (e) => {
+    e.preventDefault()
+    if (!manualAddress.trim()) return
+    
+    setBusy(true); setErr('')
+    try {
+      // 1. Get coordinates from the typed address
+      const coords = await api.geocode(manualAddress)
+      const newPos = { lat: coords.lat, lon: coords.lon }
+      
+      // 2. Update the map center and search
+      setPos(newPos)
+      await search(newPos, kind)
+    } catch (x) {
+      setErr(x.message)
+      setPlaces([])
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <LocateButton onLocate={(p) => { setPos(p); search(p, kind) }} label={pos ? 'Update my location' : 'Use my location'} />
-        <select className="input max-w-[180px]" value={kind} onChange={(e) => { setKind(e.target.value); search(pos, e.target.value) }}>
-          <option value="hospital">Hospitals</option><option value="clinic">Clinics & doctors</option><option value="pharmacy">Pharmacies</option><option value="blood_bank">Blood banks</option>
+        <LocateButton 
+          onLocate={(p) => { setPos(p); search(p, kind) }} 
+          label={pos ? 'Update my location' : 'Use my location'} 
+        />
+        
+        {/* Manual Address Search */}
+        <form onSubmit={handleManualSearch} className="flex flex-1 gap-2 min-w-[250px]">
+          <input 
+            className="input flex-1" 
+            placeholder="Or type a city/area (e.g. Kolkata)..." 
+            value={manualAddress}
+            onChange={(e) => setManualAddress(e.target.value)}
+          />
+          <button type="submit" className="btn" disabled={busy || !manualAddress.trim()}>
+            <Search className="h-4 w-4" /> Search
+          </button>
+        </form>
+
+        <select 
+          className="input max-w-[180px]" 
+          value={kind} 
+          onChange={(e) => { setKind(e.target.value); search(pos, e.target.value) }}
+        >
+          <option value="hospital">Hospitals</option>
+          <option value="clinic">Clinics & doctors</option>
+          <option value="pharmacy">Pharmacies</option>
+          <option value="blood_bank">Blood banks</option>
         </select>
         {busy && <Spinner />}
       </div>
+
       <ErrorBox message={err} />
-      {!pos && <p className="text-sm text-slate-600">Share your location to see the closest facilities on a map. Data comes from OpenStreetMap, so some places may be missing - always verify by phone.</p>}
-      {pos && <MapView center={[pos.lat, pos.lon]} places={[...places, ...ambs.map((a) => ({ ...a, name: `${a.operator} (${a.vehicle_type})`, kind: 'ambulance' }))]} />}
-      {pos && !busy && places.length === 0 && !err && <p className="mt-3 text-sm text-slate-600">Nothing found within 5 km in the map data. Call the emergency number if urgent.</p>}
+      
+      {!pos && (
+        <p className="text-sm text-slate-600">
+          Share your location or type a city/area above to see the closest facilities on a map.
+        </p>
+      )}
+      
+      {pos && (
+        <MapView 
+          center={[pos.lat, pos.lon]} 
+          places={[...places, ...ambs.map((a) => ({ ...a, name: `${a.operator} (${a.vehicle_type})`, kind: 'ambulance' }))]} 
+        />
+      )}
+      
+      {pos && !busy && places.length === 0 && !err && (
+        <p className="mt-3 text-sm text-slate-600">
+          Nothing found within 5 km in the map data. Try searching a nearby larger city or call the emergency number if urgent.
+        </p>
+      )}
+      
       <ul className="mt-4 divide-y divide-slate-100">
         {places.slice(0, 10).map((p, i) => (
           <li key={i} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
-            <div><b>{p.name}</b>{p.emergency === 'yes' && <span className="badge ml-2 bg-red-100 text-red-700">Emergency</span>}<div className="text-xs text-slate-500">{p.distance_km} km{p.address ? ` · ${p.address}` : ''}</div></div>
+            <div>
+              <b>{p.name}</b>
+              {p.emergency === 'yes' && <span className="badge ml-2 bg-red-100 text-red-700">Emergency</span>}
+              <div className="text-xs text-slate-500">{p.distance_km} km{p.address ? ` · ${p.address}` : ''}</div>
+            </div>
             <div className="flex gap-2">
-              {p.phone && <a className="btn-ghost !py-1.5" href={`tel:${String(p.phone).split(/[;,]/)[0]}`}><Phone className="h-4 w-4" /></a>}
-              <a className="btn-ghost !py-1.5" target="_blank" rel="noreferrer" href={googleDirections(p.lat, p.lon)}>Directions</a>
+              {p.phone && (
+                <a className="btn-ghost !py-1.5" href={`tel:${String(p.phone).split(/[;,]/)[0]}`}>
+                  <Phone className="h-4 w-4" />
+                </a>
+              )}
+              <a className="btn-ghost !py-1.5" target="_blank" rel="noreferrer" href={googleDirections(p.lat, p.lon)}>
+                Directions
+              </a>
             </div>
           </li>
         ))}

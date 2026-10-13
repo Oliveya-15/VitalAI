@@ -96,47 +96,54 @@ def _client() -> httpx.Client:
 
 
 # --------------------------------------------------------------------------- #
-# Geoapify transport
+# Geocoding and Geoapify transport
 # --------------------------------------------------------------------------- #
 
-def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
-    """Query Geoapify Places API."""
+def geocode_address(address: str) -> tuple[float, float] | None:
+    """Convert a text address (e.g. 'Kolkata' or 'Alipurduar') to (lat, lon)."""
     api_key = getattr(settings, 'GEOAPIFY_API_KEY', '')
     if not api_key:
-        logger.error("GEOAPIFY_API_KEY is missing from environment variables.")
-        raise RuntimeError("Map data service is misconfigured. Please contact support.")
+        logger.error("GEOAPIFY_API_KEY is missing.")
+        return None
 
-    category = _KINDS.get(kind, "healthcare")
-    filter_str = f"circle:{lon},{lat},{radius}"
-    
-    url = "https://api.geoapify.com/v2/places"
-    params = {
-        "categories": category,
-        "filter": filter_str,
-        "limit": 25,
-        "apiKey": api_key,
-    }
+    url = "https://api.geoapify.com/v1/geocode/search"
+    params = {"text": address, "limit": 1, "apiKey": api_key}
 
     try:
         r = _client().get(url, params=params)
-        
         if r.status_code != 200:
-            logger.error(f"Geoapify API error {r.status_code}: {r.text}")
-            
-        if r.status_code == 401:
-            raise RuntimeError("Invalid Geoapify API key.")
-        if r.status_code == 429:
-            raise RuntimeError("Geoapify rate limit reached. Please try again later.")
-            
+            logger.error(f"Geoapify Geocode error {r.status_code}: {r.text}")
+            return None
+        features = r.json().get("features", [])
+        if not features:
+            return None
+        coords = features[0].get("geometry", {}).get("coordinates")
+        if coords and len(coords) == 2:
+            return coords[1], coords[0]  # lat, lon
+        return None
+    except Exception as exc:
+        logger.error(f"Geocoding failed: {exc}")
+        return None
+
+
+def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
+    api_key = getattr(settings, 'GEOAPIFY_API_KEY', '')
+    if not api_key:
+        raise RuntimeError("Map data service is misconfigured.")
+    category = _KINDS.get(kind, "healthcare")
+    filter_str = f"circle:{lon},{lat},{radius}"
+    url = "https://api.geoapify.com/v2/places"
+    params = {"categories": category, "filter": filter_str, "limit": 25, "apiKey": api_key}
+
+    try:
+        r = _client().get(url, params=params)
+        if r.status_code == 401: raise RuntimeError("Invalid API key.")
+        if r.status_code == 429: raise RuntimeError("Rate limit reached.")
         r.raise_for_status()
         return r.json().get("features", [])
-        
-    except httpx.TimeoutException:
-        logger.error("Geoapify request timed out.")
-        raise RuntimeError("Map data service is busy right now. Please try again in a moment.")
     except Exception as exc:
         logger.error("Geoapify query failed: %s", exc)
-        raise RuntimeError("Map data service is busy right now. Please try again in a moment.") from exc
+        raise RuntimeError("Map data service is busy. Please try again.") from exc
 
 
 # --------------------------------------------------------------------------- #
@@ -145,42 +152,28 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
 
 def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit: int = 25) -> list[dict]:
     """Return places of `kind` near a point, nearest first. Uses Geoapify."""
-    if kind not in _KINDS:
-        raise ValueError(f"kind must be one of {list(_KINDS)}")
-    
+    if kind not in _KINDS: raise ValueError(f"kind must be one of {list(_KINDS)}")
     radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 3000)
     key = (kind, round(lat, 2), round(lon, 2), radius)
-
     cached = _cache.get(key)
-    if cached is not None:
-        return cached[:limit]
+    if cached is not None: return cached[:limit]
 
     features = _query_geoapify(lat, lon, radius, kind)
-
     places = []
     for f in features:
         props = f.get("properties", {})
         geom = f.get("geometry", {})
-        coords = geom.get("coordinates")  # [lon, lat]
-        
-        if not coords or len(coords) < 2:
-            continue
-            
+        coords = geom.get("coordinates")
+        if not coords or len(coords) < 2: continue
         p_lon, p_lat = coords[0], coords[1]
-        phone = props.get("phone") or props.get("contact", {}).get("phone")
-        address = props.get("address_line1") or props.get("address_line2") or props.get("formatted")
-        
         places.append({
             "name": props.get("name") or f"Unnamed {kind.replace('_', ' ')}",
-            "kind": kind,
-            "lat": p_lat,
-            "lon": p_lon,
+            "kind": kind, "lat": p_lat, "lon": p_lon,
             "distance_km": round(haversine_km(lat, lon, p_lat, p_lon), 2),
-            "phone": phone,
+            "phone": props.get("phone") or props.get("contact", {}).get("phone"),
             "emergency": "yes" if kind == "hospital" else "no",
-            "address": address,
+            "address": props.get("address_line1") or props.get("address_line2") or props.get("formatted"),
         })
-
     places.sort(key=lambda p: p["distance_km"])
     _cache.set(key, places)
     return places[:limit]
