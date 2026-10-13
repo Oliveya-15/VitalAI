@@ -1,8 +1,7 @@
-"""Distance maths + free OpenStreetMap (Overpass) lookups for nearby hospitals / blood banks."""
+"""Distance maths + Geoapify lookups for nearby hospitals / blood banks."""
 from __future__ import annotations
 
 import math
-import random
 import threading
 import time
 
@@ -17,14 +16,6 @@ settings = get_settings()
 CACHE_TTL = 600          # seconds
 CACHE_MAX_ENTRIES = 512
 
-# Per-mirror retry policy
-ATTEMPTS_PER_MIRROR = 3  # 1 initial attempt + 2 retries
-BACKOFF_BASE_S = 1.5     # 1.5s, 3s, 6s ...
-BACKOFF_MAX_S = 10.0
-BACKOFF_JITTER = 0.5     # ±50%
-
-RETRYABLE_STATUS = {408, 425, 429, 500, 502, 503, 504}
-
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     r = 6371.0088
@@ -34,21 +25,13 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * r * math.asin(math.sqrt(a))
 
 
-# kind -> Overpass selectors
+# Geoapify category mapping
 _KINDS = {
-    "hospital": ['nwr["amenity"="hospital"]'],
-    "clinic": ['nwr["amenity"~"clinic|doctors"]'],
-    "pharmacy": ['nwr["amenity"="pharmacy"]'],
-    "blood_bank": ['nwr["healthcare"="blood_donation"]', 'nwr["amenity"="blood_bank"]'],
+    "hospital": "healthcare.hospital",
+    "clinic": "healthcare.clinic_or_praxis",
+    "pharmacy": "healthcare.pharmacy",
+    "blood_bank": "healthcare.blood_donation",
 }
-
-# Reordered to put working mirrors first. Removed overpass-api.de from the top because Render can't reach it.
-MIRRORS = [
-    "https://overpass.kumi.systems/api/interpreter",
-    "https://overpass.osm.ch/api/interpreter",
-    "https://overpass.nchc.org.tw/api/interpreter",
-    "https://overpass-api.de/api/interpreter",
-]
 
 
 # --------------------------------------------------------------------------- #
@@ -86,10 +69,6 @@ class _TTLCache:
                     self._store.pop(oldest, None)
             self._store[key] = (time.monotonic() + self._ttl, value)
 
-    def clear(self) -> None:
-        with self._lock:
-            self._store.clear()
-
 
 _cache = _TTLCache(CACHE_TTL, CACHE_MAX_ENTRIES)
 
@@ -107,10 +86,8 @@ def _client() -> httpx.Client:
     if _client_instance is None:
         with _client_lock:
             if _client_instance is None:
-                # Increased timeout to 40s total, 15s connect time. Overpass can be slow.
                 _client_instance = httpx.Client(
-                    timeout=httpx.Timeout(40.0, connect=15.0),
-                    limits=httpx.Limits(max_connections=8, max_keepalive_connections=4),
+                    timeout=httpx.Timeout(15.0, connect=5.0),
                     headers={"User-Agent": "VitalAI/1.0 (health coordination project)"},
                     follow_redirects=True,
                 )
@@ -118,73 +95,44 @@ def _client() -> httpx.Client:
 
 
 # --------------------------------------------------------------------------- #
-# Overpass transport: mirror failover + exponential backoff
+# Geoapify transport
 # --------------------------------------------------------------------------- #
 
-def _backoff_delay(attempt: int) -> float:
-    base = min(BACKOFF_MAX_S, BACKOFF_BASE_S * (2 ** (attempt - 1)))
-    return base * (1.0 - BACKOFF_JITTER + random.random() * 2 * BACKOFF_JITTER)
+def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
+    """Query Geoapify Places API."""
+    api_key = getattr(settings, 'GEOAPIFY_API_KEY', '')
+    if not api_key:
+        logger.error("GEOAPIFY_API_KEY is missing from environment variables.")
+        raise RuntimeError("Map data service is misconfigured. Please contact support.")
 
+    category = _KINDS.get(kind, "healthcare")
+    # Geoapify uses circle:lon,lat,radius
+    filter_str = f"circle:{lon},{lat},{radius}"
+    
+    url = "https://api.geoapify.com/v2/places"
+    params = {
+        "categories": category,
+        "filter": filter_str,
+        "limit": 25,
+        "apiKey": api_key,
+    }
 
-def _query_overpass(query: str) -> list:
-    """
-    Try each public Overpass server in turn.
-    For every mirror we retry up to ATTEMPTS_PER_MIRROR times on transient
-    failures using exponential backoff with jitter.
-    """
-    last: object = None
-
-    for url in MIRRORS:
-        for attempt in range(1, ATTEMPTS_PER_MIRROR + 1):
-            try:
-                r = _client().post(url, data={"data": query})
-
-                if r.status_code in RETRYABLE_STATUS:
-                    last = f"{url} -> {r.status_code}"
-                    logger.warning(
-                        "Overpass busy on %s (attempt %d/%d): HTTP %s",
-                        url, attempt, ATTEMPTS_PER_MIRROR, r.status_code,
-                    )
-                    raise httpx.HTTPStatusError(
-                        f"HTTP {r.status_code}", request=r.request, response=r
-                    )
-
-                if r.status_code >= 400:
-                    logger.error("Overpass rejected query on %s: HTTP %s", url, r.status_code)
-                    raise RuntimeError(
-                        f"Map data service rejected the query ({r.status_code})."
-                    )
-
-                payload = r.json()
-
-                remark = str(payload.get("remark", ""))
-                if "timed out" in remark.lower() or "runtime error" in remark.lower():
-                    last = f"{url} -> remark: {remark}"
-                    logger.warning("Overpass remark on %s: %s", url, remark)
-                    raise httpx.ReadTimeout(remark or "Overpass runtime error")
-
-                return payload.get("elements", [])
-
-            except RuntimeError:
-                raise
-            except (httpx.TimeoutException, httpx.TransportError,
-                    httpx.HTTPStatusError, ValueError) as exc:
-                last = exc
-                if attempt < ATTEMPTS_PER_MIRROR:
-                    delay = _backoff_delay(attempt)
-                    logger.warning(
-                        "Overpass attempt %d/%d on %s failed (%s); sleeping %.2fs",
-                        attempt, ATTEMPTS_PER_MIRROR, url, exc, delay,
-                    )
-                    time.sleep(delay)
-                else:
-                    logger.warning(
-                        "Overpass mirror exhausted, failing over: %s", url,
-                    )
-
-    raise RuntimeError(
-        "Map data service is busy right now. Please try again in a moment."
-    ) from last
+    try:
+        r = _client().get(url, params=params)
+        
+        if r.status_code == 401:
+            logger.error("Geoapify API key is invalid (401 Unauthorized).")
+            raise RuntimeError("Map data service is busy right now. Please try again in a moment.")
+            
+        r.raise_for_status()
+        return r.json().get("features", [])
+        
+    except httpx.TimeoutException:
+        logger.error("Geoapify request timed out.")
+        raise RuntimeError("Map data service is busy right now. Please try again in a moment.")
+    except Exception as exc:
+        logger.error("Geoapify query failed: %s", exc)
+        raise RuntimeError("Map data service is busy right now. Please try again in a moment.") from exc
 
 
 # --------------------------------------------------------------------------- #
@@ -192,11 +140,10 @@ def _query_overpass(query: str) -> list:
 # --------------------------------------------------------------------------- #
 
 def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit: int = 25) -> list[dict]:
-    """Return places of `kind` near a point, nearest first. Uses OSM data (free, no key)."""
+    """Return places of `kind` near a point, nearest first. Uses Geoapify."""
     if kind not in _KINDS:
         raise ValueError(f"kind must be one of {list(_KINDS)}")
     
-    # Reduced default radius to 3000m to speed up Overpass queries
     radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 3000)
     key = (kind, round(lat, 2), round(lon, 2), radius)
 
@@ -204,33 +151,36 @@ def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit
     if cached is not None:
         return cached[:limit]
 
-    parts = "".join(f"{sel}(around:{radius},{lat},{lon});" for sel in _KINDS[kind])
-    # Increased internal Overpass timeout to 25s
-    query = f"[out:json][timeout:25];({parts});out center tags 40;"
-
-    elements = _query_overpass(query)
+    features = _query_geoapify(lat, lon, radius, kind)
 
     places = []
-    for el in elements:
-        c = el.get("center") or {"lat": el.get("lat"), "lon": el.get("lon")}
-        if c.get("lat") is None:
+    for f in features:
+        props = f.get("properties", {})
+        geom = f.get("geometry", {})
+        coords = geom.get("coordinates")  # [lon, lat]
+        
+        if not coords or len(coords) < 2:
             continue
-        tags = el.get("tags", {})
-        name = tags.get("name") or tags.get("name:en") or f"Unnamed {kind.replace('_', ' ')}"
-        places.append(
-            {
-                "name": name,
-                "kind": kind,
-                "lat": c["lat"],
-                "lon": c["lon"],
-                "distance_km": round(haversine_km(lat, lon, c["lat"], c["lon"]), 2),
-                "phone": tags.get("phone") or tags.get("contact:phone"),
-                "emergency": tags.get("emergency"),
-                "address": ", ".join(
-                    x for x in [tags.get("addr:street"), tags.get("addr:city")] if x
-                ) or None,
-            }
-        )
+            
+        p_lon, p_lat = coords[0], coords[1]
+        
+        # Extract phone from various possible fields
+        phone = props.get("phone") or props.get("contact", {}).get("phone")
+        
+        # Build address
+        address = props.get("address_line1") or props.get("address_line2") or props.get("formatted")
+        
+        places.append({
+            "name": props.get("name") or f"Unnamed {kind.replace('_', ' ')}",
+            "kind": kind,
+            "lat": p_lat,
+            "lon": p_lon,
+            "distance_km": round(haversine_km(lat, lon, p_lat, p_lon), 2),
+            "phone": phone,
+            "emergency": "yes" if kind == "hospital" else "no",
+            "address": address,
+        })
+
     places.sort(key=lambda p: p["distance_km"])
     _cache.set(key, places)
     return places[:limit]

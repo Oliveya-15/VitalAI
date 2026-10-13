@@ -30,9 +30,10 @@ class Settings(BaseSettings):
     AGENT_MAX_STEPS: int = 4
 
     # --- Free public services (no key needed) ---
-    OVERPASS_URL: str = "https://overpass-api.de/api/interpreter"
-    OVERPASS_TIMEOUT_SECONDS: float = 25.0
-    NEARBY_RADIUS_M: int = 3000
+    NEARBY_RADIUS_M: int = 3000  # Reduced from 5000 to speed up queries
+
+    # --- Geoapify (free tier, replaces Overpass) ---
+    GEOAPIFY_API_KEY: str = ""
 
     # --- Blood donation rules ---
     DONOR_REST_DAYS: int = 90  # conservative minimum gap between whole-blood donations
