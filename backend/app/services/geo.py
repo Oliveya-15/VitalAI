@@ -30,7 +30,6 @@ _KINDS = {
     "hospital": "healthcare.hospital",
     "clinic": "healthcare.clinic_or_praxis",
     "pharmacy": "healthcare.pharmacy",
-    # Geoapify doesn't have a "blood_donation" category, so we map it to hospitals.
     "blood_bank": "healthcare.hospital",
 }
 
@@ -100,30 +99,45 @@ def _client() -> httpx.Client:
 # --------------------------------------------------------------------------- #
 
 def geocode_address(address: str) -> tuple[float, float] | None:
-    """Convert a text address (e.g. 'Kolkata' or 'Alipurduar') to (lat, lon)."""
+    """
+    Convert a text address to (lat, lon).
+    Tries Geoapify first, then falls back to OpenStreetMap's Nominatim.
+    """
     api_key = getattr(settings, 'GEOAPIFY_API_KEY', '')
-    if not api_key:
-        logger.error("GEOAPIFY_API_KEY is missing.")
-        return None
+    
+    # 1. Try Geoapify (Fast, structured data)
+    if api_key:
+        url = "https://api.geoapify.com/v1/geocode/search"
+        params = {"text": address, "limit": 1, "apiKey": api_key, "format": "json"}
+        try:
+            r = _client().get(url, params=params)
+            if r.status_code == 200:
+                features = r.json().get("features", [])
+                if features:
+                    coords = features[0].get("geometry", {}).get("coordinates")
+                    if coords and len(coords) == 2:
+                        return coords[1], coords[0]  # lat, lon
+            else:
+                logger.warning(f"Geoapify Geocode error {r.status_code}: {r.text}")
+        except Exception as exc:
+            logger.warning(f"Geoapify Geocoding failed: {exc}")
 
-    url = "https://api.geoapify.com/v1/geocode/search"
-    params = {"text": address, "limit": 1, "apiKey": api_key}
-
+    # 2. Fallback to OpenStreetMap Nominatim (Free, reliable, no API key required)
+    logger.info(f"Falling back to OpenStreetMap Nominatim for address: {address}")
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {"q": address, "format": "json", "limit": 1}
+    headers = {"User-Agent": "VitalAI/1.0 (health coordination project)"}
+    
     try:
-        r = _client().get(url, params=params)
-        if r.status_code != 200:
-            logger.error(f"Geoapify Geocode error {r.status_code}: {r.text}")
-            return None
-        features = r.json().get("features", [])
-        if not features:
-            return None
-        coords = features[0].get("geometry", {}).get("coordinates")
-        if coords and len(coords) == 2:
-            return coords[1], coords[0]  # lat, lon
-        return None
+        r = _client().get(url, params=params, headers=headers)
+        if r.status_code == 200:
+            data = r.json()
+            if data:
+                return float(data[0]["lat"]), float(data[0]["lon"])
     except Exception as exc:
-        logger.error(f"Geocoding failed: {exc}")
-        return None
+        logger.error(f"Nominatim Geocoding failed: {exc}")
+
+    return None
 
 
 def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
