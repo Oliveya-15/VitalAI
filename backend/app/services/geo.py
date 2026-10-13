@@ -25,13 +25,12 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * r * math.asin(math.sqrt(a))
 
 
-# Geoapify category mapping (Strict, accurate categories)
+# Geoapify category mapping
 _KINDS = {
     "hospital": "healthcare.hospital",
     "clinic": "healthcare.clinic_or_praxis",
     "pharmacy": "healthcare.pharmacy",
-    # Geoapify doesn't have a blood donation category. We use hospitals, 
-    # where blood banks are typically located in India.
+    # Geoapify doesn't have a "blood_donation" category, so we map it to hospitals.
     "blood_bank": "healthcare.hospital",
 }
 
@@ -108,7 +107,6 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
         raise RuntimeError("Map data service is misconfigured. Please contact support.")
 
     category = _KINDS.get(kind, "healthcare")
-    # Geoapify uses circle:lon,lat,radius
     filter_str = f"circle:{lon},{lat},{radius}"
     
     url = "https://api.geoapify.com/v2/places"
@@ -122,7 +120,6 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
     try:
         r = _client().get(url, params=params)
         
-        # LOG THE EXACT ERROR FOR DEBUGGING
         if r.status_code != 200:
             logger.error(f"Geoapify API error {r.status_code}: {r.text}")
             
@@ -151,7 +148,7 @@ def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit
     if kind not in _KINDS:
         raise ValueError(f"kind must be one of {list(_KINDS)}")
     
-    radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 5000)
+    radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 3000)
     key = (kind, round(lat, 2), round(lon, 2), radius)
 
     cached = _cache.get(key)
@@ -170,11 +167,7 @@ def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit
             continue
             
         p_lon, p_lat = coords[0], coords[1]
-        
-        # Extract phone from various possible fields
         phone = props.get("phone") or props.get("contact", {}).get("phone")
-        
-        # Build address
         address = props.get("address_line1") or props.get("address_line2") or props.get("formatted")
         
         places.append({
