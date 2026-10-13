@@ -29,9 +29,11 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 _KINDS = {
     "hospital": "healthcare.hospital",
     "clinic": "healthcare.clinic_or_praxis",
-    "pharmacy": "healthcare.pharmacy",
-    # Combined fallback: Try specific blood donation, then general hospitals
-    "blood_bank": "healthcare.blood_donation,healthcare.hospital",
+    # Broadened to catch pharmacies, health stores, and clinics that dispense medicine
+    "pharmacy": "healthcare.pharmacy,commercial.health_and_beauty",
+    # Geoapify doesn't support "healthcare.blood_donation" (causes 400 error).
+    # We fall back to hospitals, where blood banks are typically located.
+    "blood_bank": "healthcare.hospital",
 }
 
 
