@@ -30,7 +30,8 @@ _KINDS = {
     "hospital": "healthcare.hospital",
     "clinic": "healthcare.clinic_or_praxis",
     "pharmacy": "healthcare.pharmacy",
-    "blood_bank": "healthcare.blood_donation",
+    # Combined fallback: Try specific blood donation, then general hospitals
+    "blood_bank": "healthcare.blood_donation,healthcare.hospital",
 }
 
 
@@ -120,9 +121,14 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
     try:
         r = _client().get(url, params=params)
         
+        # LOG THE EXACT ERROR FOR DEBUGGING
+        if r.status_code != 200:
+            logger.error(f"Geoapify API error {r.status_code}: {r.text}")
+            
         if r.status_code == 401:
-            logger.error("Geoapify API key is invalid (401 Unauthorized).")
-            raise RuntimeError("Map data service is busy right now. Please try again in a moment.")
+            raise RuntimeError("Invalid Geoapify API key.")
+        if r.status_code == 429:
+            raise RuntimeError("Geoapify rate limit reached. Please try again later.")
             
         r.raise_for_status()
         return r.json().get("features", [])

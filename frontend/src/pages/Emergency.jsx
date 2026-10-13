@@ -69,7 +69,7 @@ function Nearby() {
           <li key={i} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
             <div><b>{p.name}</b>{p.emergency === 'yes' && <span className="badge ml-2 bg-red-100 text-red-700">Emergency</span>}<div className="text-xs text-slate-500">{p.distance_km} km{p.address ? ` · ${p.address}` : ''}</div></div>
             <div className="flex gap-2">
-              {p.phone && <a className="btn-ghost !py-1.5" href={`tel:${p.phone.split(/[;,]/)[0]}`}><Phone className="h-4 w-4" /></a>}
+              {p.phone && <a className="btn-ghost !py-1.5" href={`tel:${String(p.phone).split(/[;,]/)[0]}`}><Phone className="h-4 w-4" /></a>}
               <a className="btn-ghost !py-1.5" target="_blank" rel="noreferrer" href={googleDirections(p.lat, p.lon)}>Directions</a>
             </div>
           </li>
@@ -93,7 +93,7 @@ function Ambulance({ numbers }) {
   }
   useEffect(() => { // poll status every 10 s while a request is active
     if (!out) return
-    const id = setInterval(() => api.ambulanceStatus(out.id, f.phone).then(setTrack).catch(() => {}), 10000)
+    const id = setInterval(() => api.ambulanceStatus(out.id, f.phone).then(setTrack).catch(() => { }), 10000)
     return () => clearInterval(id)
   }, [out]) // eslint-disable-line
   return (
