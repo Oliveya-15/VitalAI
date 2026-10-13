@@ -19,8 +19,8 @@ CACHE_MAX_ENTRIES = 512
 
 # Per-mirror retry policy
 ATTEMPTS_PER_MIRROR = 3  # 1 initial attempt + 2 retries
-BACKOFF_BASE_S = 1.0     # 1s, 2s, 4s ...
-BACKOFF_MAX_S = 8.0
+BACKOFF_BASE_S = 1.5     # 1.5s, 3s, 6s ...
+BACKOFF_MAX_S = 10.0
 BACKOFF_JITTER = 0.5     # ±50%
 
 RETRYABLE_STATUS = {408, 425, 429, 500, 502, 503, 504}
@@ -42,12 +42,12 @@ _KINDS = {
     "blood_bank": ['nwr["healthcare"="blood_donation"]', 'nwr["amenity"="blood_bank"]'],
 }
 
-
+# Reordered to put working mirrors first. Removed overpass-api.de from the top because Render can't reach it.
 MIRRORS = [
-    "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
-    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+    "https://overpass.osm.ch/api/interpreter",
+    "https://overpass.nchc.org.tw/api/interpreter",
+    "https://overpass-api.de/api/interpreter",
 ]
 
 
@@ -107,8 +107,9 @@ def _client() -> httpx.Client:
     if _client_instance is None:
         with _client_lock:
             if _client_instance is None:
+                # Increased timeout to 40s total, 15s connect time. Overpass can be slow.
                 _client_instance = httpx.Client(
-                    timeout=httpx.Timeout(12.0, connect=5.0),
+                    timeout=httpx.Timeout(40.0, connect=15.0),
                     limits=httpx.Limits(max_connections=8, max_keepalive_connections=4),
                     headers={"User-Agent": "VitalAI/1.0 (health coordination project)"},
                     follow_redirects=True,
@@ -128,10 +129,8 @@ def _backoff_delay(attempt: int) -> float:
 def _query_overpass(query: str) -> list:
     """
     Try each public Overpass server in turn.
-
     For every mirror we retry up to ATTEMPTS_PER_MIRROR times on transient
-    failures (timeouts, 429/5xx, Overpass `remark` timeouts) using exponential
-    backoff with jitter. If a mirror is exhausted we fail over to the next one.
+    failures using exponential backoff with jitter.
     """
     last: object = None
 
@@ -151,7 +150,6 @@ def _query_overpass(query: str) -> list:
                     )
 
                 if r.status_code >= 400:
-                    # Non-transient (bad query, blocked). Retrying won't help.
                     logger.error("Overpass rejected query on %s: HTTP %s", url, r.status_code)
                     raise RuntimeError(
                         f"Map data service rejected the query ({r.status_code})."
@@ -159,7 +157,6 @@ def _query_overpass(query: str) -> list:
 
                 payload = r.json()
 
-                # Overpass answers 200 with a `remark` when it times out.
                 remark = str(payload.get("remark", ""))
                 if "timed out" in remark.lower() or "runtime error" in remark.lower():
                     last = f"{url} -> remark: {remark}"
@@ -198,8 +195,9 @@ def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit
     """Return places of `kind` near a point, nearest first. Uses OSM data (free, no key)."""
     if kind not in _KINDS:
         raise ValueError(f"kind must be one of {list(_KINDS)}")
-    radius = radius_m or settings.NEARBY_RADIUS_M
-    # Snap to ~1.1 km grid so GPS jitter / map panning reuses cached results.
+    
+    # Reduced default radius to 3000m to speed up Overpass queries
+    radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 3000)
     key = (kind, round(lat, 2), round(lon, 2), radius)
 
     cached = _cache.get(key)
@@ -207,7 +205,8 @@ def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit
         return cached[:limit]
 
     parts = "".join(f"{sel}(around:{radius},{lat},{lon});" for sel in _KINDS[kind])
-    query = f"[out:json][timeout:10];({parts});out center tags 40;"
+    # Increased internal Overpass timeout to 25s
+    query = f"[out:json][timeout:25];({parts});out center tags 40;"
 
     elements = _query_overpass(query)
 
