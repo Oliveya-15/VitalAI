@@ -1,0 +1,157 @@
+{
+  "key": "heart",
+  "title": "Heart disease",
+  "best_model": "Logistic Regression",
+  "leaderboard": [
+    {
+      "model": "Logistic Regression",
+      "cv_roc_auc": 0.8896,
+      "cv_std": 0.0608
+    },
+    {
+      "model": "SVM (RBF)",
+      "cv_roc_auc": 0.8766,
+      "cv_std": 0.0468
+    },
+    {
+      "model": "Random Forest",
+      "cv_roc_auc": 0.8826,
+      "cv_std": 0.0559
+    },
+    {
+      "model": "Feed-forward NN",
+      "cv_roc_auc": 0.8753,
+      "cv_std": 0.0327
+    }
+  ],
+  "metrics": {
+    "accuracy": 0.8033,
+    "precision": 0.7692,
+    "recall": 0.9091,
+    "f1": 0.8333,
+    "roc_auc": 0.869,
+    "test_size": 61
+  },
+  "n_samples": 303,
+  "positive_rate": 0.5446,
+  "zero_is_missing": [],
+  "features": [
+    {
+      "name": "age",
+      "label": "Age",
+      "hint": "Years",
+      "kind": "number",
+      "min": 29.0,
+      "max": 77.0,
+      "median": 55.0
+    },
+    {
+      "name": "sex",
+      "label": "Sex",
+      "hint": "1 = male, 0 = female",
+      "kind": "select:1=Male,0=Female",
+      "min": 0.0,
+      "max": 1.0,
+      "median": 1.0
+    },
+    {
+      "name": "cp",
+      "label": "Chest pain type",
+      "hint": "0-3",
+      "kind": "select:0=Typical angina,1=Atypical angina,2=Non-anginal pain,3=Asymptomatic",
+      "min": 0.0,
+      "max": 3.0,
+      "median": 1.0
+    },
+    {
+      "name": "trestbps",
+      "label": "Resting blood pressure",
+      "hint": "mm Hg",
+      "kind": "number",
+      "min": 94.0,
+      "max": 200.0,
+      "median": 130.0
+    },
+    {
+      "name": "chol",
+      "label": "Cholesterol",
+      "hint": "mg/dL",
+      "kind": "number",
+      "min": 126.0,
+      "max": 564.0,
+      "median": 240.0
+    },
+    {
+      "name": "fbs",
+      "label": "Fasting blood sugar > 120 mg/dL",
+      "hint": "1 = true, 0 = false",
+      "kind": "select:1=Yes,0=No",
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.0
+    },
+    {
+      "name": "restecg",
+      "label": "Resting ECG result",
+      "hint": "0-2",
+      "kind": "select:0=Normal,1=ST-T abnormality,2=LV hypertrophy",
+      "min": 0.0,
+      "max": 2.0,
+      "median": 1.0
+    },
+    {
+      "name": "thalach",
+      "label": "Max heart rate achieved",
+      "hint": "bpm",
+      "kind": "number",
+      "min": 71.0,
+      "max": 202.0,
+      "median": 153.0
+    },
+    {
+      "name": "exang",
+      "label": "Exercise-induced angina",
+      "hint": "1 = yes, 0 = no",
+      "kind": "select:1=Yes,0=No",
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.0
+    },
+    {
+      "name": "oldpeak",
+      "label": "ST depression induced by exercise",
+      "hint": "Relative to rest",
+      "kind": "number",
+      "min": 0.0,
+      "max": 6.2,
+      "median": 0.8
+    },
+    {
+      "name": "slope",
+      "label": "Slope of peak exercise ST segment",
+      "hint": "0-2",
+      "kind": "select:0=Upsloping,1=Flat,2=Downsloping",
+      "min": 0.0,
+      "max": 2.0,
+      "median": 1.0
+    },
+    {
+      "name": "ca",
+      "label": "Major vessels coloured by fluoroscopy",
+      "hint": "0-3 (4 appears in the dataset as missing)",
+      "kind": "select:0=0,1=1,2=2,3=3,4=4",
+      "min": 0.0,
+      "max": 4.0,
+      "median": 0.0
+    },
+    {
+      "name": "thal",
+      "label": "Thalassemia",
+      "hint": "Dataset coding 0-3",
+      "kind": "select:0=Unknown,1=Normal,2=Fixed defect,3=Reversible defect",
+      "min": 0.0,
+      "max": 3.0,
+      "median": 2.0
+    }
+  ]
+}

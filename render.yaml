@@ -1,0 +1,28 @@
+# Render Blueprint - New > Blueprint > pick this repo. Free plan.
+services:
+  - type: web
+    name: vitalai-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL      # paste your Neon connection string
+        sync: false
+      - key: CORS_ORIGINS      # your Vercel URL, e.g. https://vitalai.vercel.app
+        sync: false
+      - key: ADMIN_KEY         # any long random string (needed to verify ambulances)
+        sync: false
+      - key: LLM_API_KEY       # optional: Groq key; leave empty for knowledge-base mode
+        sync: false
+      - key: LLM_API_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile

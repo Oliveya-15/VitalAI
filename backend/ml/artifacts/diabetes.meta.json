@@ -1,0 +1,118 @@
+{
+  "key": "diabetes",
+  "title": "Diabetes",
+  "best_model": "Logistic Regression",
+  "leaderboard": [
+    {
+      "model": "Logistic Regression",
+      "cv_roc_auc": 0.8434,
+      "cv_std": 0.0185
+    },
+    {
+      "model": "SVM (RBF)",
+      "cv_roc_auc": 0.8333,
+      "cv_std": 0.0228
+    },
+    {
+      "model": "Random Forest",
+      "cv_roc_auc": 0.8188,
+      "cv_std": 0.0221
+    },
+    {
+      "model": "Feed-forward NN",
+      "cv_roc_auc": 0.793,
+      "cv_std": 0.0393
+    }
+  ],
+  "metrics": {
+    "accuracy": 0.7078,
+    "precision": 0.6,
+    "recall": 0.5,
+    "f1": 0.5455,
+    "roc_auc": 0.813,
+    "test_size": 154
+  },
+  "n_samples": 768,
+  "positive_rate": 0.349,
+  "zero_is_missing": [
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI"
+  ],
+  "features": [
+    {
+      "name": "Pregnancies",
+      "label": "Number of pregnancies",
+      "hint": "Count (0 if not applicable)",
+      "kind": "number",
+      "min": 0.0,
+      "max": 17.0,
+      "median": 3.0
+    },
+    {
+      "name": "Glucose",
+      "label": "Glucose level",
+      "hint": "mg/dL, plasma glucose (2h OGTT)",
+      "kind": "number",
+      "min": 44.0,
+      "max": 199.0,
+      "median": 117.0
+    },
+    {
+      "name": "BloodPressure",
+      "label": "Diastolic blood pressure",
+      "hint": "mm Hg",
+      "kind": "number",
+      "min": 24.0,
+      "max": 122.0,
+      "median": 72.0
+    },
+    {
+      "name": "SkinThickness",
+      "label": "Skin-fold thickness",
+      "hint": "mm, triceps (leave 0 if unknown)",
+      "kind": "number",
+      "min": 7.0,
+      "max": 99.0,
+      "median": 29.0
+    },
+    {
+      "name": "Insulin",
+      "label": "Insulin level",
+      "hint": "mu U/ml, 2-hour serum (leave 0 if unknown)",
+      "kind": "number",
+      "min": 14.0,
+      "max": 846.0,
+      "median": 125.0
+    },
+    {
+      "name": "BMI",
+      "label": "BMI",
+      "hint": "kg/m\u00b2",
+      "kind": "number",
+      "min": 18.2,
+      "max": 67.1,
+      "median": 32.3
+    },
+    {
+      "name": "DiabetesPedigreeFunction",
+      "label": "Diabetes pedigree function",
+      "hint": "Family-history score, typically 0.08 - 2.5",
+      "kind": "number",
+      "min": 0.078,
+      "max": 2.42,
+      "median": 0.3725
+    },
+    {
+      "name": "Age",
+      "label": "Age",
+      "hint": "Years",
+      "kind": "number",
+      "min": 21.0,
+      "max": 81.0,
+      "median": 29.0
+    }
+  ]
+}

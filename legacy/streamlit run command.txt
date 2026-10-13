@@ -1,0 +1,7 @@
+streamlit run 
+
+
+"C:\Users\HP\OneDrive\Desktops\healthdiagnosis\hdp.py"
+
+
+

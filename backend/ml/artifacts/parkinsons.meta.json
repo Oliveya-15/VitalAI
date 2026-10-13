@@ -1,0 +1,238 @@
+{
+  "key": "parkinsons",
+  "title": "Parkinson's disease",
+  "best_model": "Feed-forward NN",
+  "leaderboard": [
+    {
+      "model": "Logistic Regression",
+      "cv_roc_auc": 0.8976,
+      "cv_std": 0.0366
+    },
+    {
+      "model": "SVM (RBF)",
+      "cv_roc_auc": 0.891,
+      "cv_std": 0.0453
+    },
+    {
+      "model": "Random Forest",
+      "cv_roc_auc": 0.9577,
+      "cv_std": 0.0187
+    },
+    {
+      "model": "Feed-forward NN",
+      "cv_roc_auc": 0.9679,
+      "cv_std": 0.0241
+    }
+  ],
+  "metrics": {
+    "accuracy": 0.9487,
+    "precision": 0.9655,
+    "recall": 0.9655,
+    "f1": 0.9655,
+    "roc_auc": 0.9897,
+    "test_size": 39
+  },
+  "n_samples": 195,
+  "positive_rate": 0.7538,
+  "zero_is_missing": [],
+  "features": [
+    {
+      "name": "MDVP:Fo(Hz)",
+      "label": "MDVP:Fo(Hz)",
+      "hint": "",
+      "kind": "number",
+      "min": 88.333,
+      "max": 260.105,
+      "median": 148.79
+    },
+    {
+      "name": "MDVP:Fhi(Hz)",
+      "label": "MDVP:Fhi(Hz)",
+      "hint": "",
+      "kind": "number",
+      "min": 102.145,
+      "max": 592.03,
+      "median": 175.829
+    },
+    {
+      "name": "MDVP:Flo(Hz)",
+      "label": "MDVP:Flo(Hz)",
+      "hint": "",
+      "kind": "number",
+      "min": 65.476,
+      "max": 239.17,
+      "median": 104.315
+    },
+    {
+      "name": "MDVP:Jitter(%)",
+      "label": "MDVP:Jitter(%)",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00168,
+      "max": 0.03316,
+      "median": 0.00494
+    },
+    {
+      "name": "MDVP:Jitter(Abs)",
+      "label": "MDVP:Jitter(Abs)",
+      "hint": "",
+      "kind": "number",
+      "min": 7e-06,
+      "max": 0.00026,
+      "median": 3e-05
+    },
+    {
+      "name": "MDVP:RAP",
+      "label": "MDVP:RAP",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00068,
+      "max": 0.02144,
+      "median": 0.0025
+    },
+    {
+      "name": "MDVP:PPQ",
+      "label": "MDVP:PPQ",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00092,
+      "max": 0.01958,
+      "median": 0.00269
+    },
+    {
+      "name": "Jitter:DDP",
+      "label": "Jitter:DDP",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00204,
+      "max": 0.06433,
+      "median": 0.00749
+    },
+    {
+      "name": "MDVP:Shimmer",
+      "label": "MDVP:Shimmer",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00954,
+      "max": 0.11908,
+      "median": 0.02297
+    },
+    {
+      "name": "MDVP:Shimmer(dB)",
+      "label": "MDVP:Shimmer(dB)",
+      "hint": "",
+      "kind": "number",
+      "min": 0.085,
+      "max": 1.302,
+      "median": 0.221
+    },
+    {
+      "name": "Shimmer:APQ3",
+      "label": "Shimmer:APQ3",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00455,
+      "max": 0.05647,
+      "median": 0.01279
+    },
+    {
+      "name": "Shimmer:APQ5",
+      "label": "Shimmer:APQ5",
+      "hint": "",
+      "kind": "number",
+      "min": 0.0057,
+      "max": 0.0794,
+      "median": 0.01347
+    },
+    {
+      "name": "MDVP:APQ",
+      "label": "MDVP:APQ",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00719,
+      "max": 0.13778,
+      "median": 0.01826
+    },
+    {
+      "name": "Shimmer:DDA",
+      "label": "Shimmer:DDA",
+      "hint": "",
+      "kind": "number",
+      "min": 0.01364,
+      "max": 0.16942,
+      "median": 0.03836
+    },
+    {
+      "name": "NHR",
+      "label": "NHR",
+      "hint": "",
+      "kind": "number",
+      "min": 0.00065,
+      "max": 0.31482,
+      "median": 0.01166
+    },
+    {
+      "name": "HNR",
+      "label": "HNR",
+      "hint": "",
+      "kind": "number",
+      "min": 8.441,
+      "max": 33.047,
+      "median": 22.085
+    },
+    {
+      "name": "RPDE",
+      "label": "RPDE",
+      "hint": "",
+      "kind": "number",
+      "min": 0.25657,
+      "max": 0.685151,
+      "median": 0.495954
+    },
+    {
+      "name": "DFA",
+      "label": "DFA",
+      "hint": "",
+      "kind": "number",
+      "min": 0.574282,
+      "max": 0.825288,
+      "median": 0.722254
+    },
+    {
+      "name": "spread1",
+      "label": "spread1",
+      "hint": "",
+      "kind": "number",
+      "min": -7.964984,
+      "max": -2.434031,
+      "median": -5.720868
+    },
+    {
+      "name": "spread2",
+      "label": "spread2",
+      "hint": "",
+      "kind": "number",
+      "min": 0.006274,
+      "max": 0.450493,
+      "median": 0.218885
+    },
+    {
+      "name": "D2",
+      "label": "D2",
+      "hint": "",
+      "kind": "number",
+      "min": 1.423287,
+      "max": 3.671155,
+      "median": 2.361532
+    },
+    {
+      "name": "PPE",
+      "label": "PPE",
+      "hint": "",
+      "kind": "number",
+      "min": 0.044539,
+      "max": 0.527367,
+      "median": 0.194052
+    }
+  ]
+}
