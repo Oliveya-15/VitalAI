@@ -1,6 +1,6 @@
 import secrets
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -30,6 +30,15 @@ def numbers():
 @router.post("/triage")
 def run_triage(body: TriageIn):
     return triage.triage(body.text)
+
+
+@router.get("/geocode", dependencies=auth)
+def geocode_address(address: str = Query(..., min_length=2)):
+    """Convert a typed address / city to coordinates (Geoapify, with Nominatim fallback)."""
+    coords = geo.geocode_address(address)
+    if not coords:
+        raise HTTPException(status_code=404, detail="Address not found. Please try a different search term.")
+    return {"lat": coords[0], "lon": coords[1]}
 
 
 @router.get("/nearby", dependencies=auth)

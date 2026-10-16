@@ -78,6 +78,7 @@ export const api = {
   closeBloodRequest: (id, phone, status) => req(`/blood/requests/${id}/status?contact_phone=${encodeURIComponent(phone)}`, { method: 'PATCH', body: { status } }),
   numbers: () => req('/emergency/numbers'),
   triage: (text) => req('/emergency/triage', { method: 'POST', body: { text } }),
+  geocode: (address) => req(`/emergency/geocode?address=${encodeURIComponent(address)}`),
   nearby: (kind, lat, lon) => req(`/emergency/nearby?kind=${kind}&lat=${lat}&lon=${lon}`, { timeoutMs: 40000 }),
   ambulances: (lat, lon) => req(`/emergency/ambulances${lat != null ? `?lat=${lat}&lon=${lon}` : ''}`),
   registerAmbulance: (b) => req('/emergency/ambulances', { method: 'POST', body: b }),
