@@ -6,11 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.db import get_db
+from app.deps import get_current_user
+from app.models import User
 from app.schemas import BMIIn, BPIn, ChatIn, ReportIn
-from app.services import agent, health_tools
+from app.services import activity, agent, health_tools
 
 settings = get_settings()
-router = APIRouter(tags=["Assistant & Tools"])
+router = APIRouter(tags=["Assistant & Tools"], dependencies=[Depends(get_current_user)])
 _hits: dict[str, deque] = defaultdict(deque)
 
 
@@ -26,7 +28,7 @@ def _rate_limit(request: Request) -> None:
 
 
 @router.post("/assistant/chat")
-def chat(body: ChatIn, request: Request, db: Session = Depends(get_db)):
+def chat(body: ChatIn, request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     _rate_limit(request)
     loc = {"lat": body.lat, "lon": body.lon} if body.lat is not None and body.lon is not None else None
     return agent.respond(body.message, [m.model_dump() for m in body.history], db, loc)
@@ -51,5 +53,8 @@ def bp(body: BPIn):
 
 
 @router.post("/tools/report")
-def report(body: ReportIn):
-    return health_tools.analyse_report(body.text, body.sex)
+def report(body: ReportIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    result = health_tools.analyse_report(body.text, body.sex)
+    activity.log(db, user, "report_analyzed",
+                 f"Analysed a lab report ({len(result['results'])} tests, {result['abnormal_count']} outside range)")
+    return result

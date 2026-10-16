@@ -1,16 +1,20 @@
 import secrets
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.db import get_db
-from app.models import Ambulance, AmbulanceRequest
+from app.deps import get_current_user
+from app.models import Ambulance, AmbulanceRequest, User
 from app.schemas import AmbulanceIn, AmbulanceRequestIn, AmbulanceStatusIn, TriageIn
-from app.services import geo, triage
+from app.services import activity, geo, triage
 
 settings = get_settings()
 router = APIRouter(prefix="/emergency", tags=["Emergency"])
+# NOTE: /numbers and /triage stay PUBLIC on purpose - nobody should need to log in to find the
+# ambulance number or check for red-flag symptoms. Everything else here requires a signed-in user.
+auth = [Depends(get_current_user)]
 
 
 def _admin(x_admin_key: str | None):
@@ -28,16 +32,7 @@ def run_triage(body: TriageIn):
     return triage.triage(body.text)
 
 
-@router.get("/geocode")
-def geocode_address(address: str = Query(..., min_length=2)):
-    """Convert a text address to coordinates using Geoapify."""
-    coords = geo.geocode_address(address)
-    if not coords:
-        raise HTTPException(status_code=404, detail="Address not found. Please try a different search term.")
-    return {"lat": coords[0], "lon": coords[1]}
-
-
-@router.get("/nearby")
+@router.get("/nearby", dependencies=auth)
 def nearby(kind: str, lat: float, lon: float, radius_m: int = 5000):
     if not (-90 <= lat <= 90 and -180 <= lon <= 180):
         raise HTTPException(422, "Invalid coordinates")
@@ -58,15 +53,16 @@ def _amb(a: Ambulance, lat=None, lon=None) -> dict:
 
 
 @router.post("/ambulances", status_code=201)
-def register_ambulance(body: AmbulanceIn, db: Session = Depends(get_db)):
+def register_ambulance(body: AmbulanceIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     """Providers self-register; they only appear to the public after an admin verifies them."""
     a = Ambulance(**body.model_dump())
     db.add(a)
     db.commit()
+    activity.log(db, user, "ambulance_registered", f"Registered ambulance '{a.operator}' for verification", None, a.id)
     return {"id": a.id, "verified": False, "message": "Submitted. It will be listed after verification."}
 
 
-@router.get("/ambulances")
+@router.get("/ambulances", dependencies=auth)
 def list_ambulances(lat: float | None = None, lon: float | None = None, db: Session = Depends(get_db)):
     rows = db.query(Ambulance).filter(Ambulance.verified.is_(True), Ambulance.available.is_(True)).all()
     out = [_amb(a, lat, lon) for a in rows]
@@ -93,11 +89,12 @@ def pending(db: Session = Depends(get_db), x_admin_key: str | None = Header(defa
 
 
 @router.post("/ambulance-requests", status_code=201)
-def request_ambulance(body: AmbulanceRequestIn, db: Session = Depends(get_db)):
+def request_ambulance(body: AmbulanceRequestIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     r = AmbulanceRequest(**body.model_dump())
     db.add(r)
     db.commit()
     db.refresh(r)
+    activity.log(db, user, "ambulance_request", f"Requested an ambulance: {r.emergency_type} ({r.severity})", None, r.id)
     nearest = db.query(Ambulance).filter(Ambulance.verified.is_(True), Ambulance.available.is_(True)).all()
     suggestions = sorted((_amb(a, r.lat, r.lon) for a in nearest), key=lambda x: x["distance_km"])[:3]
     return {
@@ -107,7 +104,7 @@ def request_ambulance(body: AmbulanceRequestIn, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/ambulance-requests/{rid}")
+@router.get("/ambulance-requests/{rid}", dependencies=auth)
 def get_request(rid: int, phone: str, db: Session = Depends(get_db)):
     r = db.get(AmbulanceRequest, rid)
     if not r or r.phone != phone.replace(" ", ""):

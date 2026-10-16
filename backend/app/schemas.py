@@ -119,3 +119,73 @@ class BPIn(BaseModel):
 class ReportIn(BaseModel):
     text: str = Field(min_length=3, max_length=6000)
     sex: str | None = None
+
+
+# ----------------------------------------------------------------- auth
+_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$")
+
+
+class RegisterIn(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    email: str = Field(max_length=160)
+    password: str = Field(max_length=128)
+    phone: str | None = None
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, v):
+        return " ".join(v.split())
+
+    @field_validator("email")
+    @classmethod
+    def _email(cls, v):
+        v = v.strip().lower()
+        if not _EMAIL.match(v):
+            raise ValueError("Enter a valid email address.")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def _ph(cls, v):
+        return _phone(v) if v else None
+
+
+class LoginIn(BaseModel):
+    email: str = Field(max_length=160)
+    password: str = Field(max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def _email(cls, v):
+        return v.strip().lower()
+
+
+class ProfileIn(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    phone: str | None = None
+    city: str | None = Field(default=None, max_length=80)
+    blood_group: Group | None = None
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, v):
+        return " ".join(v.split())
+
+    @field_validator("phone")
+    @classmethod
+    def _ph(cls, v):
+        return _phone(v) if v else None
+
+    @field_validator("city")
+    @classmethod
+    def _city(cls, v):
+        return v.strip() or None if v else None
+
+
+class PasswordChangeIn(BaseModel):
+    current_password: str = Field(max_length=128)
+    new_password: str = Field(max_length=128)
+
+
+class DeleteAccountIn(BaseModel):
+    password: str = Field(max_length=128)

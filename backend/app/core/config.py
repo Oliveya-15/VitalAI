@@ -30,13 +30,20 @@ class Settings(BaseSettings):
     AGENT_MAX_STEPS: int = 4
 
     # --- Free public services (no key needed) ---
-    NEARBY_RADIUS_M: int = 3000  # Reduced from 5000 to speed up queries
-
-    # --- Geoapify (free tier, replaces Overpass) ---
-    GEOAPIFY_API_KEY: str = ""
+    OVERPASS_URL: str = "https://overpass-api.de/api/interpreter"
+    OVERPASS_TIMEOUT_SECONDS: float = 25.0
+    NEARBY_RADIUS_M: int = 5000
 
     # --- Blood donation rules ---
     DONOR_REST_DAYS: int = 90  # conservative minimum gap between whole-blood donations
+
+    # --- Authentication ---
+    # Long random string used to sign login tokens. Set JWT_SECRET in Render. If it is empty we derive one
+    # from ADMIN_KEY so the app keeps working, but you should set a dedicated JWT_SECRET.
+    JWT_SECRET: str = ""
+    JWT_EXPIRE_DAYS: int = 7
+    LOGIN_MAX_FAILS: int = 8          # failed logins allowed per IP+email ...
+    LOGIN_WINDOW_SECONDS: int = 900   # ... within this window (15 min)
 
     # --- Safety / abuse protection for the free tier ---
     ADMIN_KEY: str = ""  # required for admin endpoints (verify ambulances, etc.)
@@ -70,6 +77,18 @@ class Settings(BaseSettings):
         elif url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
         return url
+
+    @property
+    def jwt_secret(self) -> str:
+        import hashlib
+
+        if self.JWT_SECRET.strip():
+            return self.JWT_SECRET.strip()
+        if self.ADMIN_KEY.strip():
+            return hashlib.sha256(("vitalai-jwt:" + self.ADMIN_KEY).encode()).hexdigest()
+        if self.ENVIRONMENT == "production":
+            raise RuntimeError("Set JWT_SECRET (a long random string) in your environment variables.")
+        return "dev-only-secret-change-me"
 
     @property
     def llm_enabled(self) -> bool:

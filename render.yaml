@@ -20,6 +20,8 @@ services:
         sync: false
       - key: ADMIN_KEY         # any long random string (needed to verify ambulances)
         sync: false
+      - key: JWT_SECRET        # long random string that signs login tokens (see AUTH_UPGRADE_GUIDE)
+        sync: false
       - key: LLM_API_KEY       # optional: Groq key; leave empty for knowledge-base mode
         sync: false
       - key: LLM_API_BASE_URL
