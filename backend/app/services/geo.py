@@ -26,10 +26,10 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 # Geoapify category mapping
-# FIXED: Removed "healthcare.nursing_home" because it is an invalid category in Geoapify's API, which caused the 400 Bad Request.
+# Searching for hospitals AND clinics to catch nursing homes
 _KINDS = {
-    "hospital": "healthcare.hospital",
-    "clinic": "healthcare.clinic_or_praxis",
+    "hospital": "healthcare.hospital,healthcare.clinic_or_praxis",
+    "clinic": "healthcare.clinic_or_praxis,healthcare.doctor",
     "pharmacy": "healthcare.pharmacy",
     "blood_bank": "healthcare.hospital",
 }
@@ -100,13 +100,7 @@ def _client() -> httpx.Client:
 # --------------------------------------------------------------------------- #
 
 def geocode_address(address: str) -> tuple[float, float] | None:
-    """
-    Convert a text address to (lat, lon).
-    Tries Geoapify first, then falls back to OpenStreetMap's Nominatim.
-    """
     api_key = getattr(settings, 'GEOAPIFY_API_KEY', '')
-    
-    # 1. Try Geoapify (Fast, structured data)
     if api_key:
         url = "https://api.geoapify.com/v1/geocode/search"
         params = {"text": address, "limit": 1, "apiKey": api_key, "format": "json"}
@@ -117,18 +111,13 @@ def geocode_address(address: str) -> tuple[float, float] | None:
                 if features:
                     coords = features[0].get("geometry", {}).get("coordinates")
                     if coords and len(coords) == 2:
-                        return coords[1], coords[0]  # lat, lon
-            else:
-                logger.warning(f"Geoapify Geocode error {r.status_code}: {r.text}")
+                        return coords[1], coords[0]
         except Exception as exc:
             logger.warning(f"Geoapify Geocoding failed: {exc}")
 
-    # 2. Fallback to OpenStreetMap Nominatim (Free, reliable, no API key required)
-    logger.info(f"Falling back to OpenStreetMap Nominatim for address: {address}")
     url = "https://nominatim.openstreetmap.org/search"
     params = {"q": address, "format": "json", "limit": 1}
     headers = {"User-Agent": "VitalAI/1.0 (health coordination project)"}
-    
     try:
         r = _client().get(url, params=params, headers=headers)
         if r.status_code == 200:
@@ -166,11 +155,10 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
 # --------------------------------------------------------------------------- #
 
 def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit: int = 25) -> list[dict]:
-    """Return places of `kind` near a point, nearest first. Uses Geoapify."""
     if kind not in _KINDS: raise ValueError(f"kind must be one of {list(_KINDS)}")
     
-    # Default radius is now 10000 (10km) instead of 3000 (3km)
-    radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 10000)
+    # FORCED 50km RADIUS (50000 meters) to guarantee we find data in Siliguri
+    radius = 50000 
     
     key = (kind, round(lat, 2), round(lon, 2), radius)
     cached = _cache.get(key)
