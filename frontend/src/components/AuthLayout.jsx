@@ -27,7 +27,20 @@ export default function AuthLayout({ title, subtitle, server, children }) {
       </aside>
       <main className="flex flex-col justify-center p-5 sm:p-10">
         <div className="mx-auto w-full max-w-md">
-          <div className="mb-6 flex items-center gap-2 lg:hidden"><img src="/logo.png" alt="VitalAI" className="h-9 w-auto object-contain" /></div>
+          {/* Small-screen hero: desktop users get the full split-screen panel instead */}
+          <section className="mb-6 rounded-3xl bg-gradient-to-br from-brand-200 via-brand-100 to-sky-50 p-5 text-brand-900 shadow-sm ring-1 ring-brand-200 lg:hidden">
+            <img src="/logo.png" alt="VitalAI" className="h-9 w-auto object-contain" />
+            <h2 className="mt-3 text-xl font-extrabold leading-tight text-brand-900">Smarter health decisions, in one place.</h2>
+            <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+              {POINTS.map(([Icon, t]) => (
+                <li key={t} className="flex items-start gap-2 text-xs text-brand-900">
+                  <span className="rounded-lg bg-white/70 p-1.5"><Icon className="h-3.5 w-3.5 text-brand-700" /></span>
+                  <span className="pt-0.5 leading-snug">{t}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 flex items-start gap-2 text-xs leading-snug text-brand-800"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" /> Not a medical device. Screening estimates and general information only - always consult a doctor.</p>
+          </section>
           <h1 className="text-2xl font-extrabold">{title}</h1>
           <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
           {server === 'waking' && <p className="mt-3 rounded-xl bg-brand-50 p-2.5 text-xs text-brand-800">Waking up the server - the first sign-in can take up to a minute.</p>}
