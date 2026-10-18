@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="frontend/public/logo.png" alt="VitalAI" width="320"/>
+<img src="public/logo.png" alt="VitalAI" width="320"/>
 
 ### AI-powered health screening, assistance, blood-donor network & emergency coordination
 **Screen → understand → ask → find help → act, all in one place**
@@ -69,7 +69,7 @@
 
 ## ✨ What VitalAI Does
 
-<p align="center"><img src="frontend/public/screenshot-home.png" alt="VitalAI home dashboard" width="820"/></p>
+<p align="center"><img src="public/screenshot-home.png" alt="VitalAI home dashboard" width="820"/></p>
 <p align="center"><sub><strong>Home</strong>: personalised dashboard with recent activity and shortcuts to every module</sub></p>
 
 - 🩺 **AI Diagnosis:** screen for **diabetes, heart disease and Parkinson's disease**. Four model families are compared per disease and the best is chosen by cross-validation. Every result shows a risk level, a probability and the **top factors that drove it**.
@@ -90,38 +90,38 @@
 
 <table>
 <tr>
-<td width="50%"><img src="frontend/public/screenshot-login.png" alt="Login"/><p align="center"><sub><strong>Login</strong>: with emergency call buttons that need no sign-in</sub></p></td>
-<td width="50%"><img src="frontend/public/screenshot-register.png" alt="Register"/><p align="center"><sub><strong>Register</strong>: live password-strength rules</sub></p></td>
+<td width="50%"><img src="public/screenshot-login.png" alt="Login"/><p align="center"><sub><strong>Login</strong>: with emergency call buttons that need no sign-in</sub></p></td>
+<td width="50%"><img src="public/screenshot-register.png" alt="Register"/><p align="center"><sub><strong>Register</strong>: live password-strength rules</sub></p></td>
 </tr>
 <tr>
-<td width="50%"><img src="frontend/public/screenshot-diagnosis.png" alt="Diagnosis form"/><p align="center"><sub><strong>Diagnosis</strong>: one tab per disease, form generated from model metadata</sub></p></td>
-<td width="50%"><img src="frontend/public/screenshot-diagnosis-result.png" alt="Diagnosis result"/><p align="center"><sub><strong>Result</strong>: risk level, probability and the factors that drove it</sub></p></td>
+<td width="50%"><img src="public/screenshot-diagnosis.png" alt="Diagnosis form"/><p align="center"><sub><strong>Diagnosis</strong>: one tab per disease, form generated from model metadata</sub></p></td>
+<td width="50%"><img src="public/screenshot-diagnosis-result.png" alt="Diagnosis result"/><p align="center"><sub><strong>Result</strong>: risk level, probability and the factors that drove it</sub></p></td>
 </tr>
 <tr>
-<td width="50%"><img src="frontend/public/screenshot-assistant.png" alt="AI Assistant"/><p align="center"><sub><strong>AI Assistant</strong>: grounded answers with sources and tools used</sub></p></td>
-<td width="50%"><img src="frontend/public/screenshot-blood-network.png" alt="Blood Network"/><p align="center"><sub><strong>Blood Network</strong>: donors, requests and compatibility matching</sub></p></td>
+<td width="50%"><img src="public/screenshot-assistant.png" alt="AI Assistant"/><p align="center"><sub><strong>AI Assistant</strong>: grounded answers with sources and tools used</sub></p></td>
+<td width="50%"><img src="public/screenshot-blood-network.png" alt="Blood Network"/><p align="center"><sub><strong>Blood Network</strong>: donors, requests and compatibility matching</sub></p></td>
 </tr>
 <tr>
-<td width="50%"><img src="frontend/public/screenshot-emergency-map.png" alt="Emergency nearby hospitals map"/><p align="center"><sub><strong>Emergency</strong>: nearby hospitals on a map, with directions</sub></p></td>
-<td width="50%"><img src="frontend/public/screenshot-triage.png" alt="Symptom triage"/><p align="center"><sub><strong>Symptom triage</strong>: instant red-flag detection with a call button</sub></p></td>
+<td width="50%"><img src="public/screenshot-emergency-map.png" alt="Emergency nearby hospitals map"/><p align="center"><sub><strong>Emergency</strong>: nearby hospitals on a map, with directions</sub></p></td>
+<td width="50%"><img src="public/screenshot-triage.png" alt="Symptom triage"/><p align="center"><sub><strong>Symptom triage</strong>: instant red-flag detection with a call button</sub></p></td>
 </tr>
 <tr>
-<td width="50%"><img src="frontend/public/screenshot-tools.png" alt="Health Tools"/><p align="center"><sub><strong>Health Tools</strong>: BMI, blood pressure and lab-report reader</sub></p></td>
-<td width="50%"><img src="frontend/public/screenshot-profile.png" alt="Profile"/><p align="center"><sub><strong>Profile</strong>: stats, recent activity and account settings</sub></p></td>
+<td width="50%"><img src="public/screenshot-tools.png" alt="Health Tools"/><p align="center"><sub><strong>Health Tools</strong>: BMI, blood pressure and lab-report reader</sub></p></td>
+<td width="50%"><img src="public/screenshot-profile.png" alt="Profile"/><p align="center"><sub><strong>Profile</strong>: stats, recent activity and account settings</sub></p></td>
 </tr>
 </table>
 
 ### 🕘 My History
 
-<p align="center"><img src="frontend/public/screenshot-history.png" alt="My History" width="820"/></p>
+<p align="center"><img src="public/screenshot-history.png" alt="My History" width="820"/></p>
 <p align="center"><sub><strong>History</strong>: every action tied to your account, filterable by category</sub></p>
 
 ### 📱 Mobile
 
 <table align="center">
 <tr>
-<td align="center" width="50%"><img src="frontend/public/screenshot-mobile-home.png" alt="Home on mobile" width="280"/><p><sub><strong>Mobile (1/2)</strong>: dashboard with the slide-out menu</sub></p></td>
-<td align="center" width="50%"><img src="frontend/public/screenshot-mobile-emergency.png" alt="Emergency on mobile" width="280"/><p><sub><strong>Mobile (2/2)</strong>: emergency numbers and nearby help</sub></p></td>
+<td align="center" width="50%"><img src="public/screenshot-mobile-home.png" alt="Home on mobile" width="280"/><p><sub><strong>Mobile (1/2)</strong>: dashboard with the slide-out menu</sub></p></td>
+<td align="center" width="50%"><img src="public/screenshot-mobile-emergency.png" alt="Emergency on mobile" width="280"/><p><sub><strong>Mobile (2/2)</strong>: emergency numbers and nearby help</sub></p></td>
 </tr>
 </table>
 
@@ -133,7 +133,7 @@
 
 ## 🩺 How Diagnosis Works
 
-<p align="center"><img src="frontend/public/diagnosis-pipeline.png" alt="Diagnosis pipeline" width="820"/></p>
+<p align="center"><img src="public/diagnosis-pipeline.png" alt="Diagnosis pipeline" width="820"/></p>
 
 Every screening walks the same pipeline:
 
@@ -171,7 +171,7 @@ Candidates compared: **Logistic Regression · SVM (RBF) · Random Forest · Feed
 
 ## 🤖 The AI Health Assistant
 
-<p align="center"><img src="frontend/public/assistant-agent-flow.png" alt="AI assistant agent flow" width="820"/></p>
+<p align="center"><img src="public/assistant-agent-flow.png" alt="AI assistant agent flow" width="820"/></p>
 
 The assistant is an **agent**, not a plain chatbot. Every message follows the same safe flow:
 
@@ -198,7 +198,7 @@ The assistant is an **agent**, not a plain chatbot. Every message follows the sa
 
 ## 🩸 Blood Network Matching
 
-<p align="center"><img src="frontend/public/blood-matching-flow.png" alt="Blood matching flow" width="820"/></p>
+<p align="center"><img src="public/blood-matching-flow.png" alt="Blood matching flow" width="820"/></p>
 
 When someone posts a blood request, donors are filtered and ranked by explicit, documented rules:
 
@@ -236,7 +236,7 @@ Every ambulance request shows a clear reminder that the platform coordinates hel
 
 ## 🔐 Authentication & Privacy
 
-<p align="center"><img src="frontend/public/auth-flow.png" alt="Authentication flow" width="820"/></p>
+<p align="center"><img src="public/auth-flow.png" alt="Authentication flow" width="820"/></p>
 
 | Area | Implementation |
 |---|---|
@@ -254,9 +254,9 @@ Every ambulance request shows a clear reminder that the platform coordinates hel
 
 ## 🧱 Architecture & Workflow
 
-<p align="center"><img src="frontend/public/architecture-diagram.png" alt="System architecture" width="820"/></p>
+<p align="center"><img src="public/architecture-diagram.png" alt="System architecture" width="820"/></p>
 
-<p align="center"><img src="frontend/public/user-flow.png" alt="User flow" width="820"/></p>
+<p align="center"><img src="public/user-flow.png" alt="User flow" width="820"/></p>
 
 VitalAI is a **modular monolith**: one backend process, one database and one frontend build, with every concern in its own folder so any part can be read, tested or replaced on its own.
 
@@ -282,7 +282,7 @@ VitalAI is a **modular monolith**: one backend process, one database and one fro
 
 ## 🧰 Tech Stack
 
-<p align="center"><img src="frontend/public/tech-stack.png" alt="Tech stack" width="820"/></p>
+<p align="center"><img src="public/tech-stack.png" alt="Tech stack" width="820"/></p>
 
 <table>
 <tr><th>Layer</th><th>Technology</th></tr>
@@ -306,7 +306,7 @@ VitalAI is a **modular monolith**: one backend process, one database and one fro
 
 ## 🌍 Free Deployment Setup
 
-<p align="center"><img src="frontend/public/deployment-diagram.png" alt="Deployment architecture" width="820"/></p>
+<p align="center"><img src="public/deployment-diagram.png" alt="Deployment architecture" width="820"/></p>
 
 | Part | Host | Why |
 |---|---|---|
@@ -351,214 +351,5 @@ VitalAI is a **modular monolith**: one backend process, one database and one fro
 ### 1. Clone
 
 ```bash
-git clone https://github.com/Oliveya-15/VitalAI.git
+git clone [https://github.com/Oliveya-15/VitalAI.git](https://github.com/Oliveya-15/VitalAI.git)
 cd VitalAI
-```
-
-### 2. Backend
-
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate            # Windows   (Mac/Linux: source .venv/bin/activate)
-pip install -r requirements.txt
-
-python -m app.seed                # optional: adds clearly-labelled DEMO donors and an ambulance
-uvicorn app.main:app --reload --port 8000
-```
-
-API docs: http://localhost:8000/docs
-
-Optional `backend/.env` (everything has a sensible local default):
-
-```env
-ENVIRONMENT=development
-JWT_SECRET=any-long-random-string
-ADMIN_KEY=any-long-random-string
-GEOAPIFY_API_KEY=your-geoapify-key     # enables nearby places and address search
-LLM_API_KEY=your-groq-key              # optional; empty = knowledge-base mode
-```
-
-### 3. Frontend (new terminal)
-
-```bash
-cd frontend
-npm install
-```
-
-Create `frontend/.env.local`:
-
-```env
-VITE_API_BASE_URL=http://localhost:8000/api/v1
-```
-
-```bash
-npm run dev                       # http://localhost:5173
-```
-
-### Tests
-
-```bash
-cd backend
-pip install -r requirements-dev.txt
-python -m pytest                  # 20 tests: API, auth, data isolation, blood rules, ambulance flow, DB migration
-```
-
-### Retrain the ML models
-
-```bash
-cd backend
-python -m ml.train                # compares 4 model families per disease, writes ml/artifacts/
-```
-
-<br/>
-
----
-
-## 🔧 Environment Variables
-
-| Variable | Used by | Purpose |
-|---|---|---|
-| `DATABASE_URL` | Backend | Database URL. Defaults to local SQLite. Production uses the Neon PostgreSQL string. |
-| `ENVIRONMENT` | Backend | `development` or `production` (production enforces the secret check) |
-| `JWT_SECRET` | Backend | Long random string that signs login tokens. **Required in production.** |
-| `ADMIN_KEY` | Backend | Secret for admin endpoints (verify ambulances, update request status) |
-| `CORS_ORIGINS` | Backend | Comma-separated list of allowed frontend URLs (any `*.vercel.app` preview is allowed by default) |
-| `GEOAPIFY_API_KEY` | Backend | Nearby places and address search (free key from geoapify.com) |
-| `LLM_API_KEY` | Backend | Optional. Enables the LLM agent. Leave empty for knowledge-base mode. |
-| `LLM_API_BASE_URL` · `LLM_MODEL` | Backend | Any OpenAI-compatible provider and model (Groq by default) |
-| `NEARBY_RADIUS_M` | Backend | Search radius for nearby places (default 3000 m) |
-| `DONOR_REST_DAYS` | Backend | Minimum days between donations (default 90) |
-| `JWT_EXPIRE_DAYS` | Backend | Login lifetime (default 7) |
-| `LOGIN_MAX_FAILS` · `LOGIN_WINDOW_SECONDS` | Backend | Brute-force guard (default 8 attempts per 15 minutes) |
-| `CHAT_RATE_LIMIT_PER_MIN` | Backend | Assistant messages allowed per IP per minute (default 12) |
-| `PYTHON_VERSION` | Render | Python runtime for the backend (`3.12.7`) |
-| `VITE_API_BASE_URL` | Frontend | Backend API base URL ending in `/api/v1`, baked in at build time |
-
-**No secrets are committed to the repository.**
-
-<br/>
-
----
-
-## 🔌 API Overview
-
-Interactive docs are generated by FastAPI at `/docs`. Route groups under `/api/v1`:
-
-| Group | Access | Purpose |
-|---|---|---|
-| `/auth` | Public: register, login. Signed-in: the rest | Register, login, profile, change password, activity feed, summary stats, delete account |
-| `/diagnosis` | 🔒 Signed-in | Model list, form schema, predict, personal history |
-| `/assistant` | 🔒 Signed-in | AI chat agent and its status |
-| `/tools` | 🔒 Signed-in | BMI, blood-pressure category, lab-report analysis |
-| `/blood` | 🔒 Signed-in | Donors, blood requests, matching, stats, compatibility table |
-| `/emergency/numbers` · `/emergency/triage` | 🌐 **Public** | Emergency numbers and red-flag symptom triage |
-| `/emergency/*` (the rest) | 🔒 Signed-in | Nearby places, address geocoding, ambulance requests and registry |
-| `/emergency/admin/*` | 🔑 Admin key | Verify ambulances, update ambulance request status |
-| `/health` · `/ping` | 🌐 Public | Health check and keep-alive |
-
-<br/>
-
----
-
-## 📁 Project Structure
-
-```
-VitalAI/
-├── backend/                FastAPI app, ML pipeline, tests
-│   ├── app/
-│   │   ├── routers/            auth, diagnosis, assistant, blood, emergency, system
-│   │   ├── services/           ml_service, agent, knowledge (RAG), triage, blood_service,
-│   │   │                       geo, health_tools, llm_service, activity
-│   │   ├── core/               config, logging, security (scrypt + JWT)
-│   │   ├── knowledge/          curated health knowledge base (JSON)
-│   │   ├── models.py           SQLAlchemy tables
-│   │   ├── schemas.py          Pydantic contracts
-│   │   ├── migrate.py          safe startup schema upgrade
-│   │   ├── deps.py             current-user dependency
-│   │   ├── seed.py             optional labelled demo data
-│   │   └── main.py             app entry point
-│   ├── ml/
-│   │   ├── train.py            compares 4 model families, saves best pipelines
-│   │   ├── data/               diabetes, heart, parkinsons CSVs
-│   │   └── artifacts/          trained models + metadata (.joblib + .meta.json)
-│   └── tests/                  pytest suite
-├── frontend/               React + Vite + Tailwind app
-│   ├── public/                 logo, favicon and README images
-│   └── src/
-│       ├── pages/              Home, Diagnosis, Assistant, BloodNetwork, Emergency,
-│       │                       Tools, History, Profile, Login, Register
-│       ├── components/         ProtectedRoute, AuthLayout, MapView, ActivityList, ui
-│       ├── context/            AuthContext
-│       └── services/           api.js (single API client)
-├── docs/                   SETUP_GUIDE.md, ARCHITECTURE.md
-├── legacy/                 original Streamlit prototype (3-disease predictor)
-├── .github/workflows/      CI: backend tests + frontend build
-├── render.yaml             Render blueprint for the backend
-└── README.md
-```
-
-<br/>
-
----
-
-## 🧪 Honest Limitations
-
-This project is open about what is real and what is not.
-
-- **Not a medical device.** The models give screening estimates only. They are **not clinically validated** and must never be used to make health decisions.
-- **Small public datasets.** Training uses datasets of 768, 303 and 195 records. The diabetes model catches only about half of positive cases in the held-out test (recall 50 %), and its accuracy is capped by the dataset. The Parkinson's dataset has several recordings per person, so its high score is probably optimistic.
-- **Retrieval is lexical, not semantic.** The assistant's knowledge base is 20 entries searched with TF-IDF, so unusual phrasing can miss. The LLM, when enabled, can still be wrong, which is why every answer carries a disclaimer and sources.
-- **Blood banks are approximated.** Geoapify has no dedicated blood-bank category, so that option currently lists hospitals. Pharmacies and clinics use their own categories. Map coverage in smaller towns depends on OpenStreetMap and Geoapify data, so always verify by phone.
-- **Donor and ambulance data are self-reported.** Donors are not identity-verified, and ambulance operators are listed only after a manual admin check. Ambulance dispatch is manual: there is no operator dashboard yet, admin actions use the API docs.
-- **No email verification or password reset.** These need a transactional email service and are on the roadmap.
-- **Login token lives in browser storage.** The frontend and backend are on different domains, so cookies would be blocked. The in-memory login limiter also resets when the server restarts.
-- **Free-tier infrastructure.** Render's free backend sleeps after inactivity (first request can take about a minute), and the Geoapify and Groq free tiers have rate limits.
-- **Demo data is labelled.** `python -m app.seed` creates clearly named `DEMO` donors and a demo ambulance for local testing only. They are not real services.
-
-<br/>
-
----
-
-## 🧭 Roadmap
-
-- [ ] **CNN medical-image screening** (for example chest X-ray) with transfer learning, exported to ONNX for lightweight serving
-- [ ] **RNN / LSTM vitals forecasting** from user-logged glucose or heart-rate readings
-- [ ] **Semantic RAG:** sentence embeddings with `pgvector`, and a larger knowledge base citing WHO and NHS guidelines
-- [ ] **Email verification and password reset** (transactional email provider)
-- [ ] **Role-based access:** admin / dispatcher dashboard for ambulance verification and live dispatch
-- [ ] **Real blood-bank directory** and donor identity verification
-- [ ] **Notifications:** SMS / WhatsApp alerts to matched donors
-- [ ] **Multi-agent workflows** (triage, records and scheduling agents)
-- [ ] **Multilingual UI and voice input** (Hindi, Bengali)
-- [ ] **Installable PWA** with offline emergency numbers
-- [ ] **Report OCR:** read photographed lab reports
-
-<br/>
-
----
-
-## 📄 License
-
-Released under the [MIT License](LICENSE). Adapt freely for coursework, portfolio or further development.
-
-<br/>
-
-## 🙏 Acknowledgments
-
-- **scikit-learn**, **pandas** and **NumPy**, for the machine-learning stack
-- **FastAPI**, **SQLAlchemy**, **React**, **Vite**, **Tailwind CSS** and **Leaflet**, and the wider open-source community this project stands on
-- **OpenStreetMap** contributors, for the map tiles and Nominatim geocoding, and **Geoapify** for the places and geocoding API
-- **Groq**, **Neon**, **Render** and **Vercel**, for generous free tiers that make a project like this possible
-- The researchers behind the public **Pima Indians Diabetes**, **Cleveland Heart Disease** and **Oxford Parkinson's Voice** datasets
-- Everyone who reviewed and tested VitalAI along the way
-
-<br/>
-
-<div align="center">
-
-**Designed, built and deployed end to end on free-tier infrastructure.**
-
-<sub>VitalAI · AI Health Platform · 2026</sub>
-
-</div>
