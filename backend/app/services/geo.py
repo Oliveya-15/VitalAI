@@ -26,9 +26,11 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 # Geoapify category mapping
+# We use comma-separated values to search multiple categories at once.
+# "Nursing home" is often tagged as a hospital, nursing_home, or clinic in OSM.
 _KINDS = {
-    "hospital": "healthcare.hospital",
-    "clinic": "healthcare.clinic_or_praxis",
+    "hospital": "healthcare.hospital,healthcare.nursing_home",
+    "clinic": "healthcare.clinic_or_praxis,healthcare.nursing_home,healthcare.doctor",
     "pharmacy": "healthcare.pharmacy",
     "blood_bank": "healthcare.hospital",
 }
@@ -144,6 +146,8 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
     api_key = getattr(settings, 'GEOAPIFY_API_KEY', '')
     if not api_key:
         raise RuntimeError("Map data service is misconfigured.")
+    
+    # This will now contain multiple categories (e.g. "healthcare.hospital,healthcare.nursing_home")
     category = _KINDS.get(kind, "healthcare")
     filter_str = f"circle:{lon},{lat},{radius}"
     url = "https://api.geoapify.com/v2/places"
@@ -167,7 +171,10 @@ def _query_geoapify(lat: float, lon: float, radius: int, kind: str) -> list:
 def nearby(kind: str, lat: float, lon: float, radius_m: int | None = None, limit: int = 25) -> list[dict]:
     """Return places of `kind` near a point, nearest first. Uses Geoapify."""
     if kind not in _KINDS: raise ValueError(f"kind must be one of {list(_KINDS)}")
-    radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 3000)
+    
+    # CHANGED: Increased default radius from 3000 (3km) to 10000 (10km)
+    radius = radius_m or getattr(settings, 'NEARBY_RADIUS_M', 10000)
+    
     key = (kind, round(lat, 2), round(lon, 2), radius)
     cached = _cache.get(key)
     if cached is not None: return cached[:limit]
