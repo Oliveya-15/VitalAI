@@ -67,11 +67,13 @@ TOOLS = [
 
 
 # ------------------------------------------------------------------ nearby-places helpers
-_NEAR = re.compile(r"\b(near(by|est)?|closest|close (to|by)( me)?|around (me|here)|in my area|my location)\b", re.I)
+# FIXED: Added "nursing home", "hospital", "clinic", "pharmacy" to the regex
+_NEAR = re.compile(r"\b(near(by|est)?|closest|close (to|by)( me)?|around (me|here)|in my area|my location|nursing home|hospital|clinic|pharmacy)\b", re.I)
+
 _PLACE_KINDS = [
     ("blood_bank", re.compile(r"blood\s*bank", re.I)),
     ("pharmacy", re.compile(r"pharmac|chemist|medical (store|shop)|medicine shop", re.I)),
-    ("clinic", re.compile(r"clinic|doctor|physician|dispensary", re.I)),
+    ("clinic", re.compile(r"clinic|doctor|physician|dispensary|nursing\s*home", re.I)),
     ("hospital", re.compile(r"hospital|emergency room|nursing home|healthcare", re.I)),
 ]
 _LABELS = {"hospital": "hospitals", "clinic": "clinics", "pharmacy": "pharmacies", "blood_bank": "blood banks"}
@@ -104,11 +106,20 @@ def _location_context(location: dict | None, kind: str | None, nearby: dict | No
                 "(or use the Emergency page) and ask again. Never guess a location.")
     ctx = ("LOCATION: the user HAS shared their live location with this chat. NEVER ask them for their location or city. "
            "For any nearby-place request use the nearby_places tool directly.")
+    
+    # FIXED: Distinguish between a technical API error and an empty list of results
     if nearby is not None:
-        ctx += ("\nThe nearby search for this request has ALREADY been run. Results (JSON): " + json.dumps(nearby)[:4000] +
-                "\nPresent up to 5 of them: name, distance in km, and the directions link as a markdown link like "
-                "[Directions](url). Say they are the closest by distance and that you cannot judge quality. "
-                "If the list is empty or there is an error, say so plainly. Add one line: for emergencies call the ambulance number.")
+        if "error" in nearby:
+            ctx += ("\nThe nearby search FAILED with a technical error. Apologize and tell them to try again later. "
+                    "Add one line: for emergencies call the ambulance number.")
+        elif not nearby.get("places"):
+            ctx += ("\nThe nearby search returned NO RESULTS within 10km. Tell the user you couldn't find any places of that type nearby. "
+                    "Do NOT mention a map service error. Tell them to try the Emergency page or call the ambulance if it is urgent.")
+        else:
+            ctx += ("\nThe nearby search for this request has ALREADY been run. Results (JSON): " + json.dumps(nearby)[:4000] +
+                    "\nPresent up to 5 of them: name, distance in km, and the directions link as a markdown link like "
+                    "[Directions](url). Say they are the closest by distance and that you cannot judge quality. "
+                    "Add one line: for emergencies call the ambulance number.")
     return ctx
 
 
@@ -122,7 +133,7 @@ def _nearby_reply(kind: str, location: dict | None, nearby: dict | None) -> str:
                 "to search nearby places.")
     places = nearby.get("places", [])
     if not places:
-        return (f"I couldn't find any {label} within a few kilometres of your location in the map data. "
+        return (f"I searched within 10km of your location but couldn't find any {label} registered in the map database. "
                 "Try the **Emergency** page with a wider search, and call the ambulance number if it is urgent.")
     lines = [f"**Closest {label} to your location** (by distance - I can't judge quality):"]
     for p in places:
