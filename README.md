@@ -353,3 +353,12 @@ VitalAI is a **modular monolith**: one backend process, one database and one fro
 ```bash
 git clone [https://github.com/Oliveya-15/VitalAI.git](https://github.com/Oliveya-15/VitalAI.git)
 cd VitalAI
+```
+
+<div align="center">
+
+**Designed, built and deployed end to end on free-tier infrastructure.**
+
+<sub>VitalAI · AI Health Platform · 2026</sub>
+
+</div>
