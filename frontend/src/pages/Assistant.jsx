@@ -10,9 +10,20 @@ const SUGGESTIONS = [
   'My blood sugar was 160 fasting, what does that mean?',
 ]
 
-/** Minimal safe renderer: **bold**, "- " bullets, paragraphs. No HTML injection. */
+/** Minimal safe renderer: **bold**, [text](https-link), bare https links, "- " bullets, paragraphs.
+ *  Only http(s) links are made clickable and nothing is injected as HTML. */
+const TOKEN = /(\*\*[^*]+\*\*|\[[^\]]+\]\(https?:\/\/[^)\s]+\)|https?:\/\/[^\s)]+)/g
+const linkCls = 'font-semibold text-brand-700 underline'
+
 function Rich({ text }) {
-  const inline = (s) => s.split(/(\*\*[^*]+\*\*)/g).map((p, i) => (p.startsWith('**') ? <b key={i}>{p.slice(2, -2)}</b> : <span key={i}>{p}</span>))
+  const inline = (s) => s.split(TOKEN).map((p, i) => {
+    if (!p) return null
+    if (p.startsWith('**') && p.endsWith('**')) return <b key={i}>{p.slice(2, -2)}</b>
+    const md = p.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/)
+    if (md) return <a key={i} href={md[2]} target="_blank" rel="noopener noreferrer" className={linkCls}>{md[1]}</a>
+    if (/^https?:\/\//.test(p)) return <a key={i} href={p} target="_blank" rel="noopener noreferrer" className={linkCls}>{p.length > 40 ? 'Open link' : p}</a>
+    return <span key={i}>{p}</span>
+  })
   return (
     <div className="space-y-1.5 text-sm leading-relaxed">
       {text.split('\n').map((ln, i) => {
